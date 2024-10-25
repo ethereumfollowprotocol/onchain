@@ -23,7 +23,7 @@ To install the project using [Bun](https://bun.sh/), follow these steps:
     ```sh
     bun install
     ```
-4. ** **: Copy the .env-example file to .env and enter rpc urls and user address
+4. **Setup Environment Variables**: Copy the .env-example file to .env and enter rpc urls and user address
     ```sh
     cp .env-example .env
     ```
