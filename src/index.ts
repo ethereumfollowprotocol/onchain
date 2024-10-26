@@ -8,28 +8,11 @@ import type {
     ContractConfig, 
     ListStorageLocationToken,
 } from './types'
+import { configs } from './config'
 import { env } from '#/env.ts'
+import { writeFile } from 'fs/promises';
 
-const contractConfigs:ContractConfig[] = [
-    {
-        chainId: '8453',
-        contractAddress: '0x41aa48ef3c0446b46a5b1cc6337ff3d3716e2a33',
-        eventSignature: ' ',
-        startBlock: 20197200n
-    },
-    {
-        chainId: '10',
-        contractAddress: '0x4Ca00413d850DcFa3516E14d21DAE2772F2aCb85',
-        eventSignature: ' ',
-        startBlock: 125792735n
-    },
-    {
-        chainId: '1',
-        contractAddress: '0x5289fE5daBC021D02FDDf23d4a4DF96F4E0F17EF',
-        eventSignature: ' ',
-        startBlock: 20820743n
-    },
-]
+
 
 let listOpEvents:Event[] = [];
 let listUserEvents:Event[] = [];
@@ -38,8 +21,13 @@ async function getHistory(): Promise<void> {
 
     // Iterate through all chains in contractConfigs and get all listop events
     console.log("Fetching ListOp events...");
-    for( const config of contractConfigs) {
-        const updatedEvents = await getContractEvents({...config, eventSignature: 'event ListOp(uint256 indexed slot, bytes op)'});
+    const listOpConfigs = [
+        configs['ListRecords_ListOp_Base'],
+        configs['ListRecords_ListOp_Op'],
+        configs['ListRecords_ListOp_Eth'],
+    ]
+    for( const config of listOpConfigs) {
+        const updatedEvents = await getContractEvents(config);
         listOpEvents = [...listOpEvents, ...updatedEvents];
     }
 
@@ -49,10 +37,15 @@ async function getHistory(): Promise<void> {
     // Filter operations for the user
     const filteredOperations = listOps.filter(op => op.recordAddress === env.USER_ADDRESS)
 
+    const listUserConfigs = [
+        configs['ListRecords_UpdateListMetadata_Base'],
+        configs['ListRecords_UpdateListMetadata_Op'],
+        configs['ListRecords_UpdateListMetadata_Eth'],
+    ]
     // Fetch UpdateListMetadata events
     console.log("Fetching List Metadata:User events...");
-    for( const config of contractConfigs) {
-        const updatedListMeta = await getContractEvents({...config, eventSignature: 'event UpdateListMetadata(uint256 indexed slot, string key, bytes value)'})
+    for( const config of listUserConfigs) {
+        const updatedListMeta = await getContractEvents(config)
         listUserEvents = [...listUserEvents, ...updatedListMeta];
     }
 
@@ -82,12 +75,7 @@ async function getHistory(): Promise<void> {
 
     // Fetch UpdateAccountMetadata events
     console.log("Fetching Account Metadata:Primary List events...");
-    const updateAccountMetadataEvents:Event[] = await getContractEvents({
-        chainId: contractConfigs[0].chainId,
-        contractAddress: env.ACCOUNT_METADATA_CONTRACT_ADDRESS,
-        eventSignature: 'event UpdateAccountMetadata(address indexed addr, string key, bytes value)',
-        startBlock: contractConfigs[0].startBlock
-    });
+    const updateAccountMetadataEvents:Event[] = await getContractEvents(configs['AccountMetadata_UpdateAccountMetadata']);
 
     // Filter the UpdateAccountMetadata events for primary lists and set the most
     // recent tokenId for each address
@@ -101,12 +89,7 @@ async function getHistory(): Promise<void> {
 
     console.log("Fetching List Storage Location events...");
     // Fetch UpdateListStorageLocation events
-    const updateListStorageLocationEvents:Event[] = await getContractEvents({
-        chainId: contractConfigs[0].chainId,
-        contractAddress: env.REGISTRY_CONTRACT_ADDRESS,
-        eventSignature: 'event UpdateListStorageLocation(uint256 indexed tokenId, bytes listStorageLocation)',
-        startBlock: contractConfigs[0].startBlock
-    });
+    const updateListStorageLocationEvents:Event[] = await getContractEvents(configs['Registry_UpdateListStorageLocation']);
 
     // Parse the list storage location data
     const listStorageLocations = updateListStorageLocationEvents.map(event => parseEvent_UpdateListStorageLocation(event));
@@ -137,6 +120,9 @@ async function getHistory(): Promise<void> {
 
     console.log("finalData", primaryListOpsWithLsl);
     console.log("finalLength", primaryListOpsWithLsl.length);
+    await writeFile('./src/efpdata/listOperations.json', JSON.stringify(primaryListOpsWithLsl, (key, value) =>
+        typeof value === 'bigint' ? value.toString() : value, 2));
+    
 }
 
 getHistory()

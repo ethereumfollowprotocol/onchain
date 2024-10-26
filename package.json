@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "bun ./src/index.ts",
-    "start": "bun ./src/index.ts",
+    "build-state": "bun ./src/index.ts",
+    "analyze": "bun ./src/analyze.ts",
     "hot": "bun --watch --hot ./src/index.ts"
   },
   "dependencies": {
