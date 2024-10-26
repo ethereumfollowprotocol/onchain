@@ -33,7 +33,7 @@ export type Operation = {
 
 export type ListOperation = Operation & {   
     slot?: bigint
-    contractAddress: `0x${string}`
+    listRecordsContract: `0x${string}`
     chainId: string
     tx: `0x${string}`
 }

@@ -67,7 +67,7 @@ async function getHistory(): Promise<void> {
         const listUserAddress = Object.entries(listUsers).find(([key, value]) => (
             key === data.slot?.toString() 
             && value.chainId === data.chainId
-            && value.listRecordAddress === data.contractAddress
+            && value.listRecordAddress === data.listRecordsContract
         ))?.[1] || null;
         return listUserAddress ? { ...data, listUserAddress: listUserAddress.value } : null;
     }).filter(item => item !== null);
@@ -114,8 +114,8 @@ async function getHistory(): Promise<void> {
     // Combine the joined valid list operations with active primary list data 
     console.log("Filtering Operations on TokenId and List User...");
     const primaryListOpsWithLsl = operationsWithLsl.map(data => {
-        const primaryListUserAddress = Object.entries(primaryLists).find(([key, value]) => (value === data.tokenId && key.toLowerCase() === data.listUserAddress.toLowerCase()))?.[0] || null;
-        return primaryListUserAddress ? { ...data, primaryListUserAddress } : null;
+        const listUserAddress = Object.entries(primaryLists).find(([key, value]) => (value === data.tokenId && key.toLowerCase() === data.listUserAddress.toLowerCase()))?.[0] || null;
+        return listUserAddress ? { ...data, listUserAddress } : null;
     }).filter(item => item !== null);
 
     console.log("finalData", primaryListOpsWithLsl);

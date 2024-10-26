@@ -22,7 +22,7 @@ export function parseEvent_ListOp(event: Event): ListOperation {
     return {
         ...parsedOperation,
         slot,
-        contractAddress: event.address,
+        listRecordsContract: event.address,
         chainId: event.chainId,
         tx: event.transactionHash
     };
@@ -130,6 +130,9 @@ export async function getContractEvents(config: ContractConfig): Promise<Event[]
     const batchSize = 2000n
     let client = evmClients[config.chainId]()
     const latestBlock = await client.getBlockNumber()
+    console.log(`[${config.chainId}] Fetching events from block ${config.startBlock} to ${latestBlock} from contract ${config.contractAddress}`);
+    // console.log(`[${config.chainId}] Contract ${config.contractAddress}`);
+    // console.log(`[${config.chainId}] ${config.eventSignature}`);
     let eventCount = 0;
     const events: Event[] = []
     for(let fromBlock = BigInt(config.startBlock); fromBlock <= latestBlock; fromBlock += batchSize) {
