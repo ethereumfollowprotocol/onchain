@@ -6,9 +6,11 @@
     "dev": "bun ./src/index.ts",
     "build-state": "bun ./src/index.ts",
     "analyze": "bun ./src/analyze.ts",
+    "start": "garson --config=./interface.entry.config.cjs",
     "hot": "bun --watch --hot ./src/index.ts"
   },
   "dependencies": {
+    "garson": "^2.0.1",
     "viem": "^2.5.0"
   },
   "devDependencies": {

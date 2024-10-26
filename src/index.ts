@@ -35,7 +35,7 @@ async function getHistory(): Promise<void> {
     const listOps = listOpEvents.map(event => parseEvent_ListOp(event))
 
     // Filter operations for the user
-    const filteredOperations = listOps.filter(op => op.recordAddress === env.USER_ADDRESS)
+    // const filteredOperations = listOps.filter(op => op.recordAddress === env.USER_ADDRESS)
 
     const listUserConfigs = [
         configs['ListRecords_UpdateListMetadata_Base'],
@@ -63,7 +63,7 @@ async function getHistory(): Promise<void> {
 
     // Combine list operations with user addresses where the slot, chainID and 
     // list records contract address match
-    const listOpsWithUsers = filteredOperations.map(data => {
+    const listOpsWithUsers = listOps.map(data => {
         const listUserAddress = Object.entries(listUsers).find(([key, value]) => (
             key === data.slot?.toString() 
             && value.chainId === data.chainId
