@@ -4,9 +4,10 @@
   "type": "module",
   "scripts": {
     "dev": "bun ./src/index.ts",
-    "build-state": "bun ./src/index.ts",
-    "analyze": "bun ./src/analyze.ts",
-    "hot": "bun --watch --hot ./src/index.ts"
+    "build-state": "bun ./src/buildState.ts",
+    "followers-history": "bun ./src/followersHistory.ts",
+    "following-history": "bun ./src/followingHistory.ts",
+    "following-contract": "bun ./src/followingContract.ts"
   },
   "dependencies": {
     "viem": "^2.5.0"

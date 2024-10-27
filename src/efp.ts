@@ -1,9 +1,11 @@
+import { env } from '#/env.ts'
 import { evmClients } from './clients/viem/index'
 import { type Abi, type Log, parseAbiItem } from 'viem'
 import type { 
     ContractConfig, 
     Event, 
     ListOperation, 
+    ListOpRecord, 
     ListStorageLocation, 
     ListStorageLocationToken, 
     Operation 
@@ -168,3 +170,124 @@ export async function getContractEvents(config: ContractConfig): Promise<Event[]
     console.log(`Found ${eventCount} events`)
     return events
 }  
+
+
+export async function followingHistory( listOps: ListOpRecord[] ) {
+    const followings: { [key: string]: string[] } = {};
+    const followingsTags: { [key: string]: {address:string, tag:string}[] } = {};
+    
+    for (const record of listOps) {
+        const follower = record.listUserAddress.toLowerCase();
+        const leader = record.recordAddress.toLowerCase();
+        const listOpCode = record.opcode;
+
+        switch (listOpCode) {
+            case '01':
+                if (!followings[follower]) {
+                    followings[follower] = [];
+                }
+                followings[follower].push(leader);
+                break;
+            case '02':
+                if (followings[follower]) {
+                    followings[follower] = followings[follower].filter(f => f !== leader);
+                    if(followings[follower].length === 0){
+                        delete followings[follower];
+                    }
+                }
+                break;
+            case '03':
+                if (!followingsTags[follower]) {
+                    followingsTags[follower] = [];
+                }
+                followingsTags[follower].push({address: leader, tag: record.tag as string});
+                break;
+            case '04':
+                if (followingsTags[follower]) {
+                    followingsTags[follower] = followingsTags[follower].filter(t => t.address !== leader && t.tag !== record.tag);
+                    if(followingsTags[follower].length === 0){
+                        delete followingsTags[follower];
+                    }
+                }
+                break;
+            default:
+    
+        }
+
+    }
+
+    for (const follower in followingsTags) {
+        // filter the followersTags object to remove any followersTags for accounts which are no longer following
+        followingsTags[follower] = followingsTags[follower]?.filter(t => followings[follower] && followings[follower].includes(t.address)) || [];
+        if(followingsTags[follower].length === 0){
+            delete followingsTags[follower];
+        }
+    }
+    const filteredFollowings = followings[env.USER_ADDRESS] || [];
+    const filteredFollowingsTags = followingsTags[env.USER_ADDRESS] || [];
+
+    console.log("following", filteredFollowings);
+    console.log("following count", filteredFollowings.length);
+    console.log("following tags", filteredFollowingsTags);
+}
+
+export async function followersHistory( listOps: ListOpRecord[] ) {
+    const followers: { [key: string]: string[] } = {};
+    const followersTags: { [key: string]: {address:string, tag:string}[] } = {};
+
+    for (const record of listOps) {
+        const follower = record.listUserAddress.toLowerCase();
+        const leader = record.recordAddress.toLowerCase();
+        const listOpCode = record.opcode;
+
+        switch (listOpCode) {
+            case '01':
+                if (!followers[leader]) {
+                    followers[leader] = [];
+                }
+                followers[leader].push(follower);
+
+                break;
+            case '02':
+                if (followers[leader]) {
+                    followers[leader] = followers[leader].filter(f => f !== follower);
+                    if(followers[leader].length === 0){
+                        delete followers[leader];
+                    }
+                }
+                break;
+            case '03':
+                if (!followersTags[leader]) {
+                    followersTags[leader] = [];
+                }
+                followersTags[leader].push({address: follower, tag: record.tag as string});
+                break;
+            case '04':
+                if (followersTags[leader]) {
+                    followersTags[leader] = followersTags[leader].filter(t => t.address !== follower && t.tag !== record.tag);
+                    if(followersTags[leader].length === 0){
+                        delete followersTags[leader];
+                    }
+                }
+                break;
+            default:
+    
+        }
+
+    }
+
+    for (const leader in followersTags) {
+        // filter the followersTags object to remove any followersTags for accounts which are no longer following
+        followersTags[leader] = followersTags[leader]?.filter(t => followers[leader] && followers[leader].includes(t.address)) || [];
+        if(followersTags[leader].length === 0){
+            delete followersTags[leader];
+        }
+    }
+
+    const filteredFollowers = followers[env.USER_ADDRESS] || [];
+    const filteredFollowersTags = followersTags[env.USER_ADDRESS] || [];
+
+    console.log("followers", filteredFollowers);
+    console.log("followers count", filteredFollowers.length);
+    console.log("followers tags", filteredFollowersTags);
+}

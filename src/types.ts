@@ -50,3 +50,10 @@ export type ListStorageLocationToken = ListStorageLocation & {
     tokenId: bigint
     blockNumber: bigint
 }
+
+export type ListOpRecord = {
+    listUserAddress: string
+    recordAddress: string
+    opcode: string
+    tag?: string
+}
