@@ -28,8 +28,23 @@ To install the project using [Bun](https://bun.sh/), follow these steps:
     cp .env-example .env
     ```
 
-5. **Run the Project**: Start the project with Bun:
+5. **Build EFP State**: fetch, parse and store EFP onchain events:
     ```sh
-    bun run start
+    bun run build-state
+    ```
+
+6. **Get Following By Contract Calls**: Get following data using contract calls:
+    ```sh
+    bun run following-contract
+    ```
+
+7. **Get Following using built state**: Get following data using locally recovered historical state:
+    ```sh
+    bun run following-history
+    ```
+
+8. **Get Followers using built state**: Get follower data using locally recovered historical state:
+    ```sh
+    bun run followers-history
     ```
 
