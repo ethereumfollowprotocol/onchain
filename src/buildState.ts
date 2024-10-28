@@ -116,8 +116,7 @@ async function getHistory(): Promise<void> {
         return listUserAddress ? { ...data, listUserAddress } : null;
     }).filter(item => item !== null);
 
-    console.log("finalData", primaryListOpsWithLsl);
-    console.log("finalLength", primaryListOpsWithLsl.length);
+    console.log("Valid Active List Operations:", primaryListOpsWithLsl.length);
     await writeFile('./src/efpdata/listOperations.json', JSON.stringify(primaryListOpsWithLsl, (key, value) =>
         typeof value === 'bigint' ? value.toString() : value, 2));
     
